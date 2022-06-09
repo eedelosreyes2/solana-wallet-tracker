@@ -15,11 +15,17 @@ const Home: NextPage = () => {
   const addressSubmitHandler = (e: MouseEvent) => {
     e.preventDefault();
 
-    const key = new PublicKey(address);
-    const connection = new Connection(clusterApiUrl('devnet'));
-    connection.getBalance(key).then((balance) => {
-      setBalance(balance / LAMPORTS_PER_SOL);
-    });
+    try {
+      const key = new PublicKey(address);
+      const connection = new Connection(clusterApiUrl('devnet'));
+      connection.getBalance(key).then((balance) => {
+        setBalance(balance / LAMPORTS_PER_SOL);
+      });
+    } catch (e) {
+      setAddress('');
+      setBalance(0);
+      alert(e);
+    }
   };
 
   const renderForm = () => {
@@ -29,7 +35,7 @@ const Home: NextPage = () => {
           id="address"
           type="text"
           placeholder="Enter an address"
-          className="rounded placeholder:text-white text-black w-full bg-slate-800"
+          className="rounded placeholder:text-white text-white w-full bg-slate-800"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
         />
@@ -47,7 +53,7 @@ const Home: NextPage = () => {
   const renderBalance = () => {
     return (
       <>
-        {balance && (
+        {balance ? (
           <div
             className="flex flex-col items-start
           bg-slate-800 rounded w-full px-3 mt-5"
@@ -66,7 +72,7 @@ const Home: NextPage = () => {
               {balance}
             </div>
           </div>
-        )}
+        ) : null}
       </>
     );
   };
@@ -80,7 +86,14 @@ const Home: NextPage = () => {
       </main>
 
       <footer className="absolute bottom-0 w-full flex justify-center py-5">
-        Created by Elijah
+        Built by
+        <a
+          href="https://elijahdr.vercel.app/"
+          target="_blank"
+          className="font-bold pl-1"
+        >
+          Elijah
+        </a>
       </footer>
     </div>
   );
