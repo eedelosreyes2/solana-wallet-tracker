@@ -183,6 +183,7 @@ const Home: NextPage = () => {
       <a
         href="https://elijahdr.vercel.app/"
         target="_blank"
+        rel="noreferrer"
         className="font-bold pl-1"
       >
         Elijah
