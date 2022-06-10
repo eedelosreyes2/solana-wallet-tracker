@@ -116,26 +116,32 @@ const Home: NextPage = () => {
       });
     });
 
+    tokens.sort((a, b) => a.name + b.name);
+
     return (
       <>
-        {balances ? (
+        {tokens ? (
           <div
             className="flex flex-col items-start
           bg-slate-800 rounded w-full px-3 mt-5"
           >
-            <div className="flex justify-between w-full py-3">
-              <div className="flex items-center">
-                <Image
-                  src="/SOL.jpg"
-                  alt=""
-                  width={25}
-                  height={25}
-                  className="rounded-full"
-                />
-                <div className="pl-2">SOL</div>
+            {tokens.map(({ address, logoURI, name, symbol, amount }) => (
+              <div key={address} className="flex justify-between w-full py-3">
+                <div className="flex items-center">
+                  <Image
+                    loader={() => logoURI}
+                    src={logoURI}
+                    unoptimized
+                    alt={name}
+                    width={25}
+                    height={25}
+                    className="rounded-full"
+                  />
+                  <div className="pl-2">{symbol}</div>
+                </div>
+                {amount}
               </div>
-              {/* {balances} */}
-            </div>
+            ))}
           </div>
         ) : null}
       </>
