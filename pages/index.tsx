@@ -168,6 +168,19 @@ const Home: NextPage = () => {
     );
   };
 
+  const renderFooter = () => (
+    <footer className="absolute bottom-0 w-full flex justify-center py-5">
+      Built by
+      <a
+        href="https://elijahdr.vercel.app/"
+        target="_blank"
+        className="font-bold pl-1"
+      >
+        Elijah
+      </a>
+    </footer>
+  );
+
   return (
     <div className="text-white bg-slate-900 h-screen relative">
       <main className="flex flex-col justify-center items-center px-3 max-w-md mx-auto">
@@ -175,17 +188,7 @@ const Home: NextPage = () => {
         {renderForm()}
         {renderBalances(balances)}
       </main>
-
-      <footer className="absolute bottom-0 w-full flex justify-center py-5">
-        Built by
-        <a
-          href="https://elijahdr.vercel.app/"
-          target="_blank"
-          className="font-bold pl-1"
-        >
-          Elijah
-        </a>
-      </footer>
+      {renderFooter()}
     </div>
   );
 };
