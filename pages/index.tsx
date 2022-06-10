@@ -1,6 +1,6 @@
 import { NextPage } from 'next';
 import Image from 'next/image';
-import { MouseEvent, useState } from 'react';
+import { MouseEvent, useEffect, useState } from 'react';
 import {
   clusterApiUrl,
   Connection,
@@ -11,8 +11,26 @@ import {
 
 const Home: NextPage = () => {
   const [address, setAddress] = useState('');
+  const [splTokens, setSplTokens] = useState([]);
   const [balances, setBalances] = useState({});
   const [nfts, setNfts] = useState({});
+
+  useEffect(() => {
+    const splTokensPromise = fetch(
+      'https://cdn.jsdelivr.net/gh/solana-labs/token-list@main/src/tokens/solana.tokenlist.json'
+    )
+      .then((response) => response.json())
+      .then((responseJson) => {
+        return responseJson.tokens;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    splTokensPromise.then((splTokens) => {
+      setSplTokens(splTokens);
+    });
+  }, []);
 
   const addressSubmitHandler = (e: MouseEvent) => {
     e.preventDefault();
@@ -76,7 +94,11 @@ const Home: NextPage = () => {
     );
   };
 
-  const renderBalance = () => {
+  const renderBalances = (balances: Object) => {
+    Object.values(balances).map(async ({ account }) => {
+      const address = account.data.parsed.info.mint;
+    });
+
     return (
       <>
         {balances ? (
@@ -103,12 +125,14 @@ const Home: NextPage = () => {
     );
   };
 
+  console.log(splTokens[0].address);
+
   return (
     <div className="text-white bg-slate-900 h-screen relative">
       <main className="flex flex-col justify-center items-center px-3 max-w-md mx-auto">
         <h1 className="text-3xl font-bold py-20">Solana Wallet Tracker</h1>
         {renderForm()}
-        {renderBalance()}
+        {renderBalances(balances)}
       </main>
 
       <footer className="absolute bottom-0 w-full flex justify-center py-5">
