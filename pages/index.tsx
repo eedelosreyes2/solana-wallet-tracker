@@ -95,8 +95,25 @@ const Home: NextPage = () => {
   };
 
   const renderBalances = (balances: Object) => {
+    let tokens = [];
+
     Object.values(balances).map(async ({ account }) => {
       const address = account.data.parsed.info.mint;
+      const amount = account.data.parsed.info.tokenAmount.uiAmountString;
+
+      splTokens.map((splToken) => {
+        if (splToken.address === address) {
+          const { logoURI, name, symbol } = splToken;
+          const token = {
+            address,
+            logoURI,
+            name,
+            symbol,
+            amount,
+          };
+          tokens.push(token);
+        }
+      });
     });
 
     return (
@@ -124,8 +141,6 @@ const Home: NextPage = () => {
       </>
     );
   };
-
-  console.log(splTokens[0].address);
 
   return (
     <div className="text-white bg-slate-900 h-screen relative">
