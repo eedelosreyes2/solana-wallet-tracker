@@ -79,6 +79,15 @@ const Home: NextPage = () => {
     setNfts(nfts);
   };
 
+  const renderHeader = () => (
+    <div className="flex flex-col items-center py-20">
+      <h1 className="text-3xl font-bold pb-3">Solana Wallet Tracker</h1>
+      <h3 className="text-center">
+        View the balances and nfts from a Solana wallet
+      </h3>
+    </div>
+  );
+
   const renderForm = () => {
     return (
       <form className="flex w-full">
@@ -184,7 +193,7 @@ const Home: NextPage = () => {
   return (
     <div className="text-white bg-slate-900 h-screen relative">
       <main className="flex flex-col justify-center items-center px-3 max-w-md mx-auto">
-        <h1 className="text-3xl font-bold py-20">Solana Wallet Tracker</h1>
+        {renderHeader()}
         {renderForm()}
         {renderBalances(balances)}
       </main>
