@@ -12,6 +12,7 @@ import {
 const Home: NextPage = () => {
   const [address, setAddress] = useState('');
   const [splTokens, setSplTokens] = useState([]);
+  const [solAmount, setSol] = useState(0);
   const [balances, setBalances] = useState({});
   const [nfts, setNfts] = useState({});
 
@@ -38,6 +39,11 @@ const Home: NextPage = () => {
     try {
       const key = new PublicKey(address);
       const connection = new Connection(clusterApiUrl('mainnet-beta'));
+
+      connection
+        .getBalance(key)
+        .then((balance) => setSol(balance / LAMPORTS_PER_SOL));
+
       connection
         .getParsedTokenAccountsByOwner(key, {
           programId: new PublicKey(
@@ -46,11 +52,12 @@ const Home: NextPage = () => {
         })
         .then((balance) => {
           parseRpcResponseAndContext(balance);
-          // setBalance(balance / LAMPORTS_PER_SOL);
         });
     } catch (e) {
       setAddress('');
+      setSol(0);
       setBalances({});
+      setNfts({});
       alert(e);
     }
   };
@@ -116,15 +123,28 @@ const Home: NextPage = () => {
       });
     });
 
-    tokens.sort((a, b) => a.name + b.name);
+    tokens.sort((a, b) => a.symbol + b.symbol);
 
     return (
       <>
-        {tokens ? (
+        {tokens.length ? (
           <div
             className="flex flex-col items-start
           bg-slate-800 rounded w-full px-3 mt-5"
           >
+            <div className="flex justify-between w-full py-3">
+              <div className="flex items-center">
+                <Image
+                  src={'/SOL.jpg'}
+                  alt={'Solana'}
+                  width={25}
+                  height={25}
+                  className="rounded-full"
+                />
+                <div className="pl-2">SOL</div>
+              </div>
+              {solAmount}
+            </div>
             {tokens.map(({ address, logoURI, name, symbol, amount }) => (
               <div key={address} className="flex justify-between w-full py-3">
                 <div className="flex items-center">
