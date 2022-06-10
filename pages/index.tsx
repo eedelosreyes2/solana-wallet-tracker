@@ -6,26 +6,52 @@ import {
   Connection,
   LAMPORTS_PER_SOL,
   PublicKey,
+  RpcResponseAndContext,
 } from '@solana/web3.js';
 
 const Home: NextPage = () => {
   const [address, setAddress] = useState('');
-  const [balance, setBalance] = useState(null);
+  const [balances, setBalances] = useState({});
+  const [nfts, setNfts] = useState({});
 
   const addressSubmitHandler = (e: MouseEvent) => {
     e.preventDefault();
 
     try {
       const key = new PublicKey(address);
-      const connection = new Connection(clusterApiUrl('devnet'));
-      connection.getBalance(key).then((balance) => {
-        setBalance(balance / LAMPORTS_PER_SOL);
-      });
+      const connection = new Connection(clusterApiUrl('mainnet-beta'));
+      connection
+        .getParsedTokenAccountsByOwner(key, {
+          programId: new PublicKey(
+            'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
+          ),
+        })
+        .then((balance) => {
+          parseRpcResponseAndContext(balance);
+          // setBalance(balance / LAMPORTS_PER_SOL);
+        });
     } catch (e) {
       setAddress('');
-      setBalance(0);
+      setBalances({});
       alert(e);
     }
+  };
+
+  const parseRpcResponseAndContext = (balance: RpcResponseAndContext<any>) => {
+    let ownedBalances = balance.value.filter(
+      ({ account }) =>
+        account.data.parsed.info.tokenAmount.amount > 0 &&
+        account.data.parsed.info.tokenAmount.decimals > 0
+    );
+
+    let nfts = balance.value.filter(
+      ({ account }) =>
+        account.data.parsed.info.tokenAmount.amount > 0 &&
+        account.data.parsed.info.tokenAmount.decimals === 0
+    );
+
+    setBalances(ownedBalances);
+    setNfts(nfts);
   };
 
   const renderForm = () => {
@@ -53,7 +79,7 @@ const Home: NextPage = () => {
   const renderBalance = () => {
     return (
       <>
-        {balance ? (
+        {balances ? (
           <div
             className="flex flex-col items-start
           bg-slate-800 rounded w-full px-3 mt-5"
@@ -69,7 +95,7 @@ const Home: NextPage = () => {
                 />
                 <div className="pl-2">SOL</div>
               </div>
-              {balance}
+              {/* {balances} */}
             </div>
           </div>
         ) : null}
