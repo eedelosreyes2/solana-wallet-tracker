@@ -15,6 +15,7 @@ const Home: NextPage = () => {
   const [solAmount, setSol] = useState(0);
   const [balances, setBalances] = useState({});
   const [nfts, setNfts] = useState({});
+  const [nftMetadata, setNftMetadata] = useState([]);
 
   useEffect(() => {
     const splTokensPromise = fetch(
@@ -114,14 +115,14 @@ const Home: NextPage = () => {
     let tokens = [];
 
     Object.values(balances).map(async ({ account }) => {
-      const address = account.data.parsed.info.mint;
+      const { mint } = account.data.parsed.info;
       const amount = account.data.parsed.info.tokenAmount.uiAmountString;
 
       splTokens.map((splToken) => {
-        if (splToken.address === address) {
+        if (splToken.address === mint) {
           const { logoURI, name, symbol } = splToken;
           const token = {
-            address,
+            mint,
             logoURI,
             name,
             symbol,
@@ -154,8 +155,8 @@ const Home: NextPage = () => {
               </div>
               {solAmount}
             </div>
-            {tokens.map(({ address, logoURI, name, symbol, amount }) => (
-              <div key={address} className="flex justify-between w-full py-3">
+            {tokens.map(({ mint, logoURI, name, symbol, amount }) => (
+              <div key={mint} className="flex justify-between w-full py-3">
                 <div className="flex items-center">
                   <Image
                     loader={() => logoURI}
@@ -171,6 +172,66 @@ const Home: NextPage = () => {
                 {amount}
               </div>
             ))}
+          </div>
+        ) : null}
+      </>
+    );
+  };
+
+  const renderNfts = (nfts: Object) => {
+    Object.values(nfts).map(async ({ account }) => {
+      const { mint } = account.data.parsed.info;
+
+      fetch('https://api-mainnet.magiceden.dev/v2/tokens/' + mint, {
+        method: 'GET',
+        redirect: 'follow',
+      })
+        .then((response) => response.json())
+        .then((result) => {
+          const { attributes, collection, image, name, supply } = result;
+          const token = {
+            mint,
+            attributes,
+            collection,
+            image,
+            name,
+            supply,
+          };
+          if (!nftMetadata.includes(token)) {
+            setNftMetadata([...nftMetadata, token]);
+          }
+        })
+        .catch((err) => console.log(err));
+    });
+
+    // what
+    Object.entries(nftMetadata).map((token) => console.log(token));
+
+    return (
+      <>
+        {nftMetadata.length ? (
+          <div
+            className="flex flex-col items-start
+          bg-slate-800 rounded w-full px-3 mt-5"
+          >
+            {nftMetadata.map(
+              ({ mint, attributes, collection, image, name, supply }) => (
+                <div key={mint} className="flex justify-between w-full py-3">
+                  <div className="flex items-center">
+                    <Image
+                      loader={() => image}
+                      src={image}
+                      unoptimized
+                      alt={name}
+                      width={25}
+                      height={25}
+                      className="rounded-full"
+                    />
+                  </div>
+                  {name}
+                </div>
+              )
+            )}
           </div>
         ) : null}
       </>
@@ -197,6 +258,7 @@ const Home: NextPage = () => {
         {renderHeader()}
         {renderForm()}
         {renderBalances(balances)}
+        {renderNfts(nfts)}
       </main>
       {renderFooter()}
     </div>
