@@ -98,11 +98,11 @@ const Home: NextPage = () => {
 
           // TODO: fix logic
           if (nftMetadata.length) {
-            nftMetadata.map((nft) => {
-              if (nft.mint !== mint) {
-                setNftMetadata([...nftMetadata, token]);
-              }
-            });
+            // nftMetadata.map((nft) => {
+            //   if (nft.mint !== mint) {
+            //     setNftMetadata([...nftMetadata, token]);
+            //   }
+            // });
           } else {
             setNftMetadata([token]);
           }
