@@ -247,23 +247,26 @@ const Home: NextPage = () => {
         {nftMetadata.length ? (
           <div
             className="flex flex-col items-start
-          bg-slate-800 rounded w-full px-3 mt-5"
+          bg-slate-800 rounded w-full px-3 mt-5 mb-32"
           >
             {nftMetadata.map(
               ({ mint, attributes, collection, image, name, supply }) => (
-                <div key={mint} className="flex justify-between w-full py-3">
-                  <div className="flex items-center">
+                <div
+                  key={mint}
+                  className="flex flex-col items-center w-full py-5 pb-10"
+                >
+                  <div className="flex flex-col items-center">
+                    <div className="font-bold pb-2">{name}</div>
                     <Image
                       loader={() => image}
                       src={image}
                       unoptimized
                       alt={name}
-                      width={25}
-                      height={25}
-                      className="rounded-full"
+                      width={225}
+                      height={225}
+                      className="rounded"
                     />
                   </div>
-                  {name}
                 </div>
               )
             )}
@@ -288,7 +291,7 @@ const Home: NextPage = () => {
   );
 
   return (
-    <div className="text-white bg-slate-900 h-screen relative">
+    <div className="text-white bg-slate-900 min-h-screen relative">
       <main className="flex flex-col justify-center items-center px-3 max-w-md mx-auto">
         {renderHeader()}
         {renderForm()}
