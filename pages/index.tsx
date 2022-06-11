@@ -14,7 +14,6 @@ const Home: NextPage = () => {
   const [splTokens, setSplTokens] = useState([]);
   const [solAmount, setSol] = useState(0);
   const [balances, setBalances] = useState({});
-  const [nfts, setNfts] = useState({});
   const [nftMetadata, setNftMetadata] = useState([]);
 
   useEffect(() => {
@@ -58,7 +57,6 @@ const Home: NextPage = () => {
       setAddress('');
       setSol(0);
       setBalances({});
-      setNfts({});
       alert(e);
     }
   };
@@ -77,7 +75,40 @@ const Home: NextPage = () => {
     );
 
     setBalances(ownedBalances);
-    setNfts(nfts);
+
+    // Nfts
+    Object.values(nfts).map(async ({ account }) => {
+      const { mint } = account.data.parsed.info;
+
+      fetch('https://api-mainnet.magiceden.dev/v2/tokens/' + mint, {
+        method: 'GET',
+        redirect: 'follow',
+      })
+        .then((response) => response.json())
+        .then((result) => {
+          const { attributes, collection, image, name, supply } = result;
+          const token = {
+            mint,
+            attributes,
+            collection,
+            image,
+            name,
+            supply,
+          };
+
+          // TODO: fix logic
+          if (nftMetadata.length) {
+            nftMetadata.map((nft) => {
+              if (nft.mint !== mint) {
+                setNftMetadata([...nftMetadata, token]);
+              }
+            });
+          } else {
+            setNftMetadata([token]);
+          }
+        })
+        .catch((err) => console.log(err));
+    });
   };
 
   const renderHeader = () => (
@@ -178,34 +209,38 @@ const Home: NextPage = () => {
     );
   };
 
-  const renderNfts = (nfts: Object) => {
-    Object.values(nfts).map(async ({ account }) => {
-      const { mint } = account.data.parsed.info;
+  const renderNfts = () => {
+    // Object.values(nfts).map(async ({ account }) => {
+    //   const { mint } = account.data.parsed.info;
 
-      fetch('https://api-mainnet.magiceden.dev/v2/tokens/' + mint, {
-        method: 'GET',
-        redirect: 'follow',
-      })
-        .then((response) => response.json())
-        .then((result) => {
-          const { attributes, collection, image, name, supply } = result;
-          const token = {
-            mint,
-            attributes,
-            collection,
-            image,
-            name,
-            supply,
-          };
-          if (!nftMetadata.includes(token)) {
-            setNftMetadata([...nftMetadata, token]);
-          }
-        })
-        .catch((err) => console.log(err));
-    });
+    //   fetch('https://api-mainnet.magiceden.dev/v2/tokens/' + mint, {
+    //     method: 'GET',
+    //     redirect: 'follow',
+    //   })
+    //     .then((response) => response.json())
+    //     .then((result) => {
+    //       const { attributes, collection, image, name, supply } = result;
+    //       const token = {
+    //         mint,
+    //         attributes,
+    //         collection,
+    //         image,
+    //         name,
+    //         supply,
+    //       };
 
-    // what
-    Object.entries(nftMetadata).map((token) => console.log(token));
+    //       if (nftMetadata.length) {
+    //         nftMetadata.map((nft) => {
+    //           if (nft.mint !== mint) {
+    //             // setNftMetadata([...nftMetadata, token]);
+    //           }
+    //         });
+    //       } else {
+    //         setNftMetadata([token]);
+    //       }
+    //     })
+    //     .catch((err) => console.log(err));
+    // });
 
     return (
       <>
@@ -258,7 +293,7 @@ const Home: NextPage = () => {
         {renderHeader()}
         {renderForm()}
         {renderBalances(balances)}
-        {renderNfts(nfts)}
+        {renderNfts()}
       </main>
       {renderFooter()}
     </div>
