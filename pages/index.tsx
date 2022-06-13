@@ -105,9 +105,6 @@ const Home: NextPage = () => {
       const { mint } = account.data.parsed.info;
 
       let headers = new Headers();
-      headers.append('Content-Type', 'application/json');
-      headers.append('Accept', 'application/json');
-      headers.append('Origin', 'http://localhost:3000');
 
       // TODO: Fix cors error
       fetch('https://api-mainnet.magiceden.dev/v2/tokens/' + mint, {
