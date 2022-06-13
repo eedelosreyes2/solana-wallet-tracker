@@ -14,7 +14,7 @@ const Home: NextPage = () => {
   const [splTokens, setSplTokens] = useState([]);
   const [solAmount, setSol] = useState(0);
   const [balances, setBalances] = useState({});
-  const [nftMetadata, setNftMetadata] = useState([]);
+  const [nfts, setNfts] = useState([]);
 
   useEffect(() => {
     const splTokensPromise = fetch(
@@ -54,9 +54,7 @@ const Home: NextPage = () => {
           parseRpcResponseAndContext(balance);
         });
     } catch (e) {
-      setAddress('');
-      setSol(0);
-      setBalances({});
+      clearData();
       alert(e);
     }
   };
@@ -68,7 +66,7 @@ const Home: NextPage = () => {
         account.data.parsed.info.tokenAmount.decimals > 0
     );
 
-    let nfts = balance.value.filter(
+    let ownedNfts = balance.value.filter(
       ({ account }) =>
         account.data.parsed.info.tokenAmount.amount > 0 &&
         account.data.parsed.info.tokenAmount.decimals === 0
@@ -76,8 +74,7 @@ const Home: NextPage = () => {
 
     setBalances(ownedBalances);
 
-    // Nfts
-    Object.values(nfts).map(async ({ account }) => {
+    ownedNfts.map(async ({ account }) => {
       const { mint } = account.data.parsed.info;
 
       fetch('https://api-mainnet.magiceden.dev/v2/tokens/' + mint, {
@@ -96,19 +93,20 @@ const Home: NextPage = () => {
             supply,
           };
 
-          // TODO: fix logic
-          if (nftMetadata.length) {
-            // nftMetadata.map((nft) => {
-            //   if (nft.mint !== mint) {
-            //     setNftMetadata([...nftMetadata, token]);
-            //   }
-            // });
-          } else {
-            setNftMetadata([token]);
+          let index = nfts.findIndex((nft) => nft.mint === mint);
+          if (index < 0) {
+            setNfts((nft) => nft.concat(token));
           }
         })
         .catch((err) => console.log(err));
     });
+  };
+
+  const clearData = () => {
+    setAddress('');
+    setSol(0);
+    setBalances({});
+    setNfts([]);
   };
 
   const renderHeader = () => (
@@ -210,46 +208,14 @@ const Home: NextPage = () => {
   };
 
   const renderNfts = () => {
-    // Object.values(nfts).map(async ({ account }) => {
-    //   const { mint } = account.data.parsed.info;
-
-    //   fetch('https://api-mainnet.magiceden.dev/v2/tokens/' + mint, {
-    //     method: 'GET',
-    //     redirect: 'follow',
-    //   })
-    //     .then((response) => response.json())
-    //     .then((result) => {
-    //       const { attributes, collection, image, name, supply } = result;
-    //       const token = {
-    //         mint,
-    //         attributes,
-    //         collection,
-    //         image,
-    //         name,
-    //         supply,
-    //       };
-
-    //       if (nftMetadata.length) {
-    //         nftMetadata.map((nft) => {
-    //           if (nft.mint !== mint) {
-    //             // setNftMetadata([...nftMetadata, token]);
-    //           }
-    //         });
-    //       } else {
-    //         setNftMetadata([token]);
-    //       }
-    //     })
-    //     .catch((err) => console.log(err));
-    // });
-
     return (
       <>
-        {nftMetadata.length ? (
+        {nfts.length ? (
           <div
             className="flex flex-col items-start
           bg-slate-800 rounded w-full px-3 mt-5 mb-32"
           >
-            {nftMetadata.map(
+            {nfts.map(
               ({ mint, attributes, collection, image, name, supply }) => (
                 <div
                   key={mint}
@@ -257,21 +223,24 @@ const Home: NextPage = () => {
                 >
                   <div className="flex flex-col items-center">
                     <div className="font-bold pb-2">{name}</div>
-                    <Image
-                      loader={() => image}
-                      src={image}
-                      unoptimized
-                      alt={name}
-                      width={225}
-                      height={225}
-                      className="rounded"
-                    />
+                    {image ? (
+                      <Image
+                        loader={() => image}
+                        src={image}
+                        unoptimized
+                        alt={name}
+                        width={225}
+                        height={225}
+                        className="rounded"
+                      />
+                    ) : null}
                   </div>
                 </div>
               )
             )}
           </div>
         ) : null}
+        <div>{nfts.length}</div>
       </>
     );
   };
