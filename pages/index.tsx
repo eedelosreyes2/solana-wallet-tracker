@@ -104,8 +104,15 @@ const Home: NextPage = () => {
     ownedNfts.map(async ({ account }) => {
       const { mint } = account.data.parsed.info;
 
+      let headers = new Headers();
+      headers.append('Content-Type', 'application/json');
+      headers.append('Accept', 'application/json');
+      headers.append('Origin', 'http://localhost:3000');
+
       fetch('https://api-mainnet.magiceden.dev/v2/tokens/' + mint, {
+        mode: 'cors',
         method: 'GET',
+        headers: headers,
         redirect: 'follow',
       })
         .then((response) => response.json())
