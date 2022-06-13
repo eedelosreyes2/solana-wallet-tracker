@@ -14,7 +14,7 @@ const Home: NextPage = () => {
   const [address, setAddress] = useState('');
   const [submittedAddress, setSubmittedAddress] = useState('');
   const [solAmount, setSol] = useState(0);
-  const [balances, setBalances] = useState({});
+  const [balances, setBalances] = useState([]);
   const [nfts, setNfts] = useState([]);
 
   useEffect(() => {
@@ -64,6 +64,7 @@ const Home: NextPage = () => {
 
   const parseRpcResponseAndContext = (balance: RpcResponseAndContext<any>) => {
     setSubmittedAddress(address);
+    setBalances([]);
     setNfts([]);
 
     let ownedBalances = balance.value.filter(
@@ -78,7 +79,29 @@ const Home: NextPage = () => {
         account.data.parsed.info.tokenAmount.decimals === 0
     );
 
-    setBalances(ownedBalances);
+    // Balances
+    ownedBalances.map(async ({ account }) => {
+      const { mint } = account.data.parsed.info;
+      const amount = account.data.parsed.info.tokenAmount.uiAmountString;
+
+      splTokens.map((splToken) => {
+        if (splToken.address === mint) {
+          const { logoURI, name, symbol } = splToken;
+          const token = {
+            mint,
+            logoURI,
+            name,
+            symbol,
+            amount,
+          };
+
+          let index = balances.findIndex((balance) => balance.mint === mint);
+          if (index < 0) {
+            setBalances((balance) => balance.concat(token));
+          }
+        }
+      });
+    });
 
     // Nfts
     ownedNfts.map(async ({ account }) => {
@@ -113,7 +136,7 @@ const Home: NextPage = () => {
     setAddress('');
     setSubmittedAddress('');
     setSol(0);
-    setBalances({});
+    setBalances([]);
     setNfts([]);
   };
 
@@ -148,33 +171,10 @@ const Home: NextPage = () => {
     );
   };
 
-  const renderBalances = (balances: Object) => {
-    let tokens = [];
-
-    Object.values(balances).map(async ({ account }) => {
-      const { mint } = account.data.parsed.info;
-      const amount = account.data.parsed.info.tokenAmount.uiAmountString;
-
-      splTokens.map((splToken) => {
-        if (splToken.address === mint) {
-          const { logoURI, name, symbol } = splToken;
-          const token = {
-            mint,
-            logoURI,
-            name,
-            symbol,
-            amount,
-          };
-          tokens.push(token);
-        }
-      });
-    });
-
-    tokens.sort((a, b) => a.symbol + b.symbol);
-
+  const renderBalances = () => {
     return (
       <>
-        {tokens.length ? (
+        {balances.length ? (
           <div
             className="flex flex-col items-start
           bg-slate-800 rounded w-full px-3 mt-5"
@@ -192,23 +192,25 @@ const Home: NextPage = () => {
               </div>
               {solAmount}
             </div>
-            {tokens.map(({ mint, logoURI, name, symbol, amount }) => (
-              <div key={mint} className="flex justify-between w-full py-3">
-                <div className="flex items-center">
-                  <Image
-                    loader={() => logoURI}
-                    src={logoURI}
-                    unoptimized
-                    alt={name}
-                    width={25}
-                    height={25}
-                    className="rounded-full"
-                  />
-                  <div className="pl-2">{symbol}</div>
+            {balances.map(({ mint, logoURI, name, symbol, amount }) =>
+              logoURI ? (
+                <div key={mint} className="flex justify-between w-full py-3">
+                  <div className="flex items-center">
+                    <Image
+                      loader={() => logoURI}
+                      src={logoURI}
+                      unoptimized
+                      alt={name}
+                      width={25}
+                      height={25}
+                      className="rounded-full"
+                    />
+                    <div className="pl-2">{symbol}</div>
+                  </div>
+                  {amount}
                 </div>
-                {amount}
-              </div>
-            ))}
+              ) : null
+            )}
           </div>
         ) : null}
       </>
@@ -223,28 +225,26 @@ const Home: NextPage = () => {
             className="flex flex-col items-start
           bg-slate-800 rounded w-full px-3 mt-5 mb-32"
           >
-            {nfts.map(
-              ({ mint, attributes, collection, image, name, supply }) => (
+            {nfts.map(({ mint, attributes, collection, image, name, supply }) =>
+              image ? (
                 <div
                   key={mint}
                   className="flex flex-col items-center w-full py-5 pb-10"
                 >
                   <div className="flex flex-col items-center">
                     <div className="font-bold pb-2">{name}</div>
-                    {image ? (
-                      <Image
-                        loader={() => image}
-                        src={image}
-                        unoptimized
-                        alt={name}
-                        width={225}
-                        height={225}
-                        className="rounded"
-                      />
-                    ) : null}
+                    <Image
+                      loader={() => image}
+                      src={image}
+                      unoptimized
+                      alt={name}
+                      width={225}
+                      height={225}
+                      className="rounded"
+                    />
                   </div>
                 </div>
-              )
+              ) : null
             )}
           </div>
         ) : null}
@@ -271,7 +271,7 @@ const Home: NextPage = () => {
       <main className="flex flex-col justify-center items-center px-3 max-w-md mx-auto">
         {renderHeader()}
         {renderForm()}
-        {renderBalances(balances)}
+        {renderBalances()}
         {renderNfts()}
       </main>
       {renderFooter()}
