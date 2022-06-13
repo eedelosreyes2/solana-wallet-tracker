@@ -95,10 +95,7 @@ const Home: NextPage = () => {
             amount,
           };
 
-          let index = balances.findIndex((balance) => balance.mint === mint);
-          if (index < 0) {
-            setBalances((balance) => balance.concat(token));
-          }
+          setBalances((balance) => balance.concat(token));
         }
       });
     });
