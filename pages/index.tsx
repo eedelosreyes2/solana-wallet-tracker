@@ -10,8 +10,9 @@ import {
 } from '@solana/web3.js';
 
 const Home: NextPage = () => {
-  const [address, setAddress] = useState('');
   const [splTokens, setSplTokens] = useState([]);
+  const [address, setAddress] = useState('');
+  const [submittedAddress, setSubmittedAddress] = useState('');
   const [solAmount, setSol] = useState(0);
   const [balances, setBalances] = useState({});
   const [nfts, setNfts] = useState([]);
@@ -36,30 +37,35 @@ const Home: NextPage = () => {
   const addressSubmitHandler = (e: MouseEvent) => {
     e.preventDefault();
 
-    try {
-      const key = new PublicKey(address);
-      const connection = new Connection(clusterApiUrl('mainnet-beta'));
+    if (address !== submittedAddress) {
+      try {
+        const key = new PublicKey(address);
+        const connection = new Connection(clusterApiUrl('mainnet-beta'));
 
-      connection
-        .getBalance(key)
-        .then((balance) => setSol(balance / LAMPORTS_PER_SOL));
+        connection
+          .getBalance(key)
+          .then((balance) => setSol(balance / LAMPORTS_PER_SOL));
 
-      connection
-        .getParsedTokenAccountsByOwner(key, {
-          programId: new PublicKey(
-            'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
-          ),
-        })
-        .then((balance) => {
-          parseRpcResponseAndContext(balance);
-        });
-    } catch (e) {
-      clearData();
-      alert(e);
+        connection
+          .getParsedTokenAccountsByOwner(key, {
+            programId: new PublicKey(
+              'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
+            ),
+          })
+          .then((balance) => {
+            parseRpcResponseAndContext(balance);
+          });
+      } catch (e) {
+        clearData();
+        alert(e);
+      }
     }
   };
 
   const parseRpcResponseAndContext = (balance: RpcResponseAndContext<any>) => {
+    setSubmittedAddress(address);
+    setNfts([]);
+
     let ownedBalances = balance.value.filter(
       ({ account }) =>
         account.data.parsed.info.tokenAmount.amount > 0 &&
@@ -74,6 +80,7 @@ const Home: NextPage = () => {
 
     setBalances(ownedBalances);
 
+    // Nfts
     ownedNfts.map(async ({ account }) => {
       const { mint } = account.data.parsed.info;
 
@@ -104,6 +111,7 @@ const Home: NextPage = () => {
 
   const clearData = () => {
     setAddress('');
+    setSubmittedAddress('');
     setSol(0);
     setBalances({});
     setNfts([]);
@@ -240,7 +248,6 @@ const Home: NextPage = () => {
             )}
           </div>
         ) : null}
-        <div>{nfts.length}</div>
       </>
     );
   };
