@@ -166,8 +166,10 @@ const Home: NextPage = () => {
         />
         <link rel="icon" href="/SOL.jpg" />
       </Head>
-      <h1 className="text-3xl font-bold pb-3">Solana Wallet Tracker</h1>
-      <h3 className="text-center">
+      <h1 className="text-center font-bold text-3xl pb-3 sm:text-5xl">
+        Solana Wallet Tracker
+      </h1>
+      <h3 className="text-center sm:text-xl">
         View the balances and nfts from a Solana wallet
       </h3>
     </div>
@@ -313,7 +315,10 @@ const Home: NextPage = () => {
 
   return (
     <div className="text-white bg-slate-900 min-h-screen relative">
-      <main className="flex flex-col justify-center items-center px-3 max-w-md mx-auto">
+      <main
+        className="min-h-screen flex flex-col justify-center 
+        items-center px-3 pb-32 max-w-md sm:max-w-lg mx-auto"
+      >
         {renderHeader()}
         {renderForm()}
         {renderBalances()}
