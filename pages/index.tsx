@@ -1,13 +1,17 @@
 import { NextPage } from 'next';
 import Image from 'next/image';
+import Head from 'next/head';
 import { MouseEvent, useEffect, useState } from 'react';
 import {
   clusterApiUrl,
   Connection,
   LAMPORTS_PER_SOL,
   PublicKey,
+  PublicKeyInitData,
   RpcResponseAndContext,
 } from '@solana/web3.js';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
 const Home: NextPage = () => {
   const [splTokens, setSplTokens] = useState([]);
@@ -16,6 +20,7 @@ const Home: NextPage = () => {
   const [solAmount, setSol] = useState(0);
   const [balances, setBalances] = useState([]);
   const [nfts, setNfts] = useState([]);
+  const { publicKey } = useWallet();
 
   useEffect(() => {
     const splTokensPromise = fetch(
@@ -34,8 +39,17 @@ const Home: NextPage = () => {
     });
   }, []);
 
-  const addressSubmitHandler = (e: MouseEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (publicKey) {
+      setAddress(publicKey.toString());
+      addressSubmitHandler(null, publicKey.toString());
+    } else {
+      clearData();
+    }
+  }, [publicKey]);
+
+  const addressSubmitHandler = (e: MouseEvent, address: String) => {
+    if (e) e.preventDefault();
 
     if (address !== submittedAddress) {
       try {
@@ -55,9 +69,9 @@ const Home: NextPage = () => {
           .then((balance) => {
             parseRpcResponseAndContext(balance);
           });
-      } catch (e) {
+      } catch (err) {
         clearData();
-        alert(e);
+        alert(err);
       }
     }
   };
@@ -144,6 +158,14 @@ const Home: NextPage = () => {
 
   const renderHeader = () => (
     <div className="flex flex-col items-center py-20">
+      <Head>
+        <title>Solana Wallet Tracker</title>
+        <meta
+          name="description"
+          content="Track the activity of a Solana Wallet"
+        />
+        <link rel="icon" href="/SOL.jpg" />
+      </Head>
       <h1 className="text-3xl font-bold pb-3">Solana Wallet Tracker</h1>
       <h3 className="text-center">
         View the balances and nfts from a Solana wallet
@@ -153,23 +175,39 @@ const Home: NextPage = () => {
 
   const renderForm = () => {
     return (
-      <form className="flex w-full">
-        <input
-          id="address"
-          type="text"
-          placeholder="Enter an address"
-          className="rounded placeholder:text-white text-white w-full bg-slate-800"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-        />
-        <button
-          type="submit"
-          onClick={(e) => addressSubmitHandler(e)}
-          className="text-center bg-teal-400 rounded px-3"
-        >
-          Search
-        </button>
-      </form>
+      <>
+        {!publicKey ? (
+          <>
+            <form className="flex w-full">
+              <input
+                id="address"
+                type="text"
+                placeholder="Enter an address"
+                className="rounded placeholder:text-white text-white w-full bg-slate-800"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+              />
+              <button
+                type="submit"
+                onClick={(e) => addressSubmitHandler(e, address)}
+                className="text-center font-bold bg-teal-400 rounded px-3"
+              >
+                Search
+              </button>
+            </form>
+
+            <div className="flex items-center justify-evenly w-full">
+              <hr className="text-slate-100 w-40" />
+              <div className="p-5 font-bold">or</div>
+              <hr className="text-slate-100 w-40" />
+            </div>
+          </>
+        ) : null}
+
+        <div className="rounded pb-20">
+          <WalletMultiButton className="wallet-adapter-button-select" />
+        </div>
+      </>
     );
   };
 

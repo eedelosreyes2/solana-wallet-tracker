@@ -9,4 +9,10 @@
   .image-wrapper > span {
     width: 400px !important;
   }
+
+  .wallet-adapter-button-select {
+    background-color: #2dd4bf !important;
+    font-family: inherit !important;
+    font-weight: bold !important;
+  }
 }
