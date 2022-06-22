@@ -231,18 +231,18 @@ const Home: NextPage = () => {
               image ? (
                 <div
                   key={mint}
-                  className="flex flex-col items-center w-full py-5 pb-10"
+                  className="h-100 flex flex-col items-center w-full py-5 pb-10"
                 >
-                  <div className="flex flex-col items-center">
-                    <div className="font-bold pb-2">{name}</div>
+                  <div className="image-wrapper flex flex-col items-center">
+                    {/* <div className="font-bold pb-2">{name}</div> */}
                     <Image
                       loader={() => image}
                       src={image}
-                      unoptimized
                       alt={name}
+                      unoptimized
                       width={225}
                       height={225}
-                      className="rounded"
+                      className="rounded min-w-min"
                     />
                   </div>
                 </div>
