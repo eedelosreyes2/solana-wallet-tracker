@@ -5,6 +5,8 @@ Production site is still waiting for Magic Eden to allow access to the API, but 
 ```
 git clone https://github.com/eedelosreyes2/solana-wallet-tracker.git
 
+cd /solana-wallet-tracker
+
 npm i
 
 npm run dev
