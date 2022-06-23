@@ -199,9 +199,9 @@ const Home: NextPage = () => {
             </form>
 
             <div className="flex items-center justify-evenly w-full">
-              <hr className="text-slate-100 w-40" />
+              <hr className="w-40" />
               <div className="p-5 font-bold">or</div>
-              <hr className="text-slate-100 w-40" />
+              <hr className="w-40" />
             </div>
           </>
         ) : null}
