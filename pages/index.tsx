@@ -317,7 +317,7 @@ const Home: NextPage = () => {
     <div className="text-white bg-slate-900 min-h-screen relative">
       <main
         className="min-h-screen flex flex-col justify-center 
-        items-center px-3 pb-32 max-w-md sm:max-w-lg mx-auto"
+        items-center px-3 pb-10 sm:pb-32 max-w-md sm:max-w-lg mx-auto"
       >
         {renderHeader()}
         {renderForm()}
