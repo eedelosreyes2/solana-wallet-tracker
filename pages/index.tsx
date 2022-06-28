@@ -7,7 +7,6 @@ import {
   Connection,
   LAMPORTS_PER_SOL,
   PublicKey,
-  PublicKeyInitData,
   RpcResponseAndContext,
 } from '@solana/web3.js';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -117,31 +116,22 @@ const Home: NextPage = () => {
     // Nfts
     ownedNfts.map(async ({ account }) => {
       const { mint } = account.data.parsed.info;
+      const network = 'mainnet-beta';
 
-      let headers = new Headers();
-
-      // TODO: Fix cors error
-      fetch('https://api-mainnet.magiceden.dev/v2/tokens/' + mint, {
+      fetch(`https://api.blockchainapi.com/v1/solana/nft/${network}/${mint}`, {
         mode: 'cors',
         method: 'GET',
-        headers: headers,
-        redirect: 'follow',
+        headers: {
+          APIKeyID: process.env.NEXT_PUBLIC_KEY_ID,
+          APISecretKey: process.env.NEXT_PUBLIC_SECRET_KEY,
+        },
       })
         .then((response) => response.json())
         .then((result) => {
-          const { attributes, collection, image, name, supply } = result;
-          const token = {
-            mint,
-            attributes,
-            collection,
-            image,
-            name,
-            supply,
-          };
-
+          const { name, image } = result.off_chain_data;
           let index = nfts.findIndex((nft) => nft.mint === mint);
           if (index < 0) {
-            setNfts((nft) => nft.concat(token));
+            setNfts((nft) => nft.concat({ mint, name, image }));
           }
         })
         .catch((err) => console.log(err));
