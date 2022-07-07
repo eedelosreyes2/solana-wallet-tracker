@@ -109,7 +109,6 @@ const Home: NextPage = () => {
             symbol,
             amount,
           };
-
           setBalances((balance) => balance.concat(token));
         }
       });
@@ -125,11 +124,15 @@ const Home: NextPage = () => {
           network: 'mainnet',
         });
         const { name, metaplex } = data;
-        // TODO: get imageUrl
+        let imageUrl = '';
+
+        await fetch(metaplex.metadataUri)
+          .then((response) => response.json())
+          .then((data) => (imageUrl = data.image));
 
         let index = nfts.findIndex((nft) => nft.mint === mint);
         if (index < 0) {
-          setNfts((nft) => nft.concat({ mint, name /* ,imageUrl */ }));
+          setNfts((nft) => nft.concat({ mint, name, imageUrl }));
         }
       } catch (error) {
         console.log(error);
@@ -257,7 +260,7 @@ const Home: NextPage = () => {
           bg-slate-800 rounded w-full px-3 mt-5 mb-32"
           >
             {nfts.map(
-              ({ mint, attributes, collection, image, name, supply }) => (
+              ({ mint, attributes, collection, imageUrl, name, supply }) => (
                 <div
                   key={mint}
                   className="h-100 flex flex-col items-center w-full py-5 pb-10"
@@ -269,10 +272,10 @@ const Home: NextPage = () => {
                     className="cursor-pointer image-wrapper flex flex-col items-center"
                   >
                     <div className="font-bold pb-2">{name}</div>
-                    {image ? (
+                    {imageUrl ? (
                       <Image
-                        loader={() => image}
-                        src={image}
+                        loader={() => imageUrl}
+                        src={imageUrl}
                         alt={name}
                         unoptimized
                         width={225}
