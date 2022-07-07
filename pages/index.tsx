@@ -11,6 +11,7 @@ import {
 } from '@solana/web3.js';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { useMoralisSolanaApi } from 'react-moralis';
 
 const Home: NextPage = () => {
   const [splTokens, setSplTokens] = useState([]);
@@ -20,6 +21,7 @@ const Home: NextPage = () => {
   const [balances, setBalances] = useState([]);
   const [nfts, setNfts] = useState([]);
   const { publicKey } = useWallet();
+  const { SolanaAPI } = useMoralisSolanaApi();
 
   useEffect(() => {
     const splTokensPromise = fetch(
@@ -116,25 +118,22 @@ const Home: NextPage = () => {
     // Nfts
     ownedNfts.map(async ({ account }) => {
       const { mint } = account.data.parsed.info;
-      const network = 'mainnet-beta';
 
-      fetch(`https://api.blockchainapi.com/v1/solana/nft/${network}/${mint}`, {
-        mode: 'cors',
-        method: 'GET',
-        headers: {
-          APIKeyID: process.env.NEXT_PUBLIC_KEY_ID,
-          APISecretKey: process.env.NEXT_PUBLIC_SECRET_KEY,
-        },
-      })
-        .then((response) => response.json())
-        .then((result) => {
-          const { name, image } = result.off_chain_data;
-          let index = nfts.findIndex((nft) => nft.mint === mint);
-          if (index < 0) {
-            setNfts((nft) => nft.concat({ mint, name, image }));
-          }
-        })
-        .catch((err) => console.log(err));
+      try {
+        const data = await SolanaAPI.nft.getNFTMetadata({
+          address: mint,
+          network: 'mainnet',
+        });
+        const { name, metaplex } = data;
+        // TODO: get imageUrl
+
+        let index = nfts.findIndex((nft) => nft.mint === mint);
+        if (index < 0) {
+          setNfts((nft) => nft.concat({ mint, name /* ,imageUrl */ }));
+        }
+      } catch (error) {
+        console.log(error);
+      }
     });
   };
 
@@ -257,8 +256,8 @@ const Home: NextPage = () => {
             className="flex flex-col items-start
           bg-slate-800 rounded w-full px-3 mt-5 mb-32"
           >
-            {nfts.map(({ mint, attributes, collection, image, name, supply }) =>
-              image ? (
+            {nfts.map(
+              ({ mint, attributes, collection, image, name, supply }) => (
                 <div
                   key={mint}
                   className="h-100 flex flex-col items-center w-full py-5 pb-10"
@@ -270,18 +269,20 @@ const Home: NextPage = () => {
                     className="cursor-pointer image-wrapper flex flex-col items-center"
                   >
                     <div className="font-bold pb-2">{name}</div>
-                    <Image
-                      loader={() => image}
-                      src={image}
-                      alt={name}
-                      unoptimized
-                      width={225}
-                      height={225}
-                      className="rounded min-w-min"
-                    />
+                    {image ? (
+                      <Image
+                        loader={() => image}
+                        src={image}
+                        alt={name}
+                        unoptimized
+                        width={225}
+                        height={225}
+                        className="rounded min-w-min"
+                      />
+                    ) : null}
                   </a>
                 </div>
-              ) : null
+              )
             )}
           </div>
         ) : null}

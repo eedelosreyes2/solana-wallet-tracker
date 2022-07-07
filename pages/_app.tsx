@@ -17,6 +17,7 @@ import {
   TorusWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
 import '@solana/wallet-adapter-react-ui/styles.css';
+import { MoralisProvider } from 'react-moralis';
 
 const App = ({ Component, pageProps }: AppProps) => {
   // Can be set to 'devnet', 'testnet', or 'mainnet-beta'
@@ -43,7 +44,12 @@ const App = ({ Component, pageProps }: AppProps) => {
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>
-          <Component {...pageProps} />
+          <MoralisProvider
+            appId={process.env.NEXT_PUBLIC_APP_ID}
+            serverUrl={process.env.NEXT_PUBLIC_SERVER_URL}
+          >
+            <Component {...pageProps} />
+          </MoralisProvider>
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
