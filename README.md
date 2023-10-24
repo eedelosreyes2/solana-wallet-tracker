@@ -1,11 +1,1 @@
-View the balances and nfts from a Solana wallet.
-
-```
-git clone https://github.com/eedelosreyes2/solana-wallet-tracker.git
-
-cd /solana-wallet-tracker
-
-npm i
-
-npm run dev
-```
+Dapp no longer has wallet connection functionality due to inactivity in Moralis.
